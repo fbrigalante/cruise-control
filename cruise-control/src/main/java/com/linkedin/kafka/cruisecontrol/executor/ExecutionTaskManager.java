@@ -520,4 +520,8 @@ public class ExecutionTaskManager {
   public synchronized ExecutionTasksSummary getExecutionTasksSummary(Set<TaskType> taskTypesToGetFullList) {
     return _executionTaskTracker.getExecutionTasksSummary(taskTypesToGetFullList);
   }
+
+  public synchronized Set<Integer> getUnthrottledBrokers() {
+    return _brokersToSkipConcurrencyCheck;
+  }
 }

@@ -1342,7 +1342,7 @@ public class Executor {
 
         AlterPartitionReassignmentsResult result = null;
         if (!tasksToExecute.isEmpty()) {
-          throttleHelper.setThrottles(tasksToExecute.stream().map(ExecutionTask::proposal).collect(Collectors.toList()));
+          throttleHelper.setThrottles(tasksToExecute.stream().map(ExecutionTask::proposal).collect(Collectors.toList()), _executionTaskManager.getUnthrottledBrokers());
           // Execute the tasks.
           _executionTaskManager.markTasksInProgress(tasksToExecute);
           result = ExecutionUtils.submitReplicaReassignmentTasks(_adminClient, tasksToExecute);

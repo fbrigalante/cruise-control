@@ -14,16 +14,8 @@ import org.apache.kafka.clients.admin.ConfigEntry;
 import org.apache.kafka.common.config.ConfigResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.TreeSet;
+
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -60,12 +52,19 @@ class ReplicationThrottleHelper {
 
   void setThrottles(List<ExecutionProposal> replicaMovementProposals)
   throws ExecutionException, InterruptedException, TimeoutException {
+    setThrottles(replicaMovementProposals, new HashSet<>());
+  }
+
+  void setThrottles(List<ExecutionProposal> replicaMovementProposals, Set<Integer> unthrottledBrokers)
+  throws ExecutionException, InterruptedException, TimeoutException {
     if (throttlingEnabled()) {
       LOG.info("Setting a rebalance throttle of {} bytes/sec", _throttleRate);
       Set<Integer> participatingBrokers = getParticipatingBrokers(replicaMovementProposals);
       Map<String, Set<String>> throttledReplicas = getThrottledReplicasByTopic(replicaMovementProposals);
       for (int broker : participatingBrokers) {
-        setThrottledRateIfUnset(broker);
+        if (!unthrottledBrokers.contains(broker)) {
+          setThrottledRateIfUnset(broker);
+        }
       }
       for (Map.Entry<String, Set<String>> entry : throttledReplicas.entrySet()) {
         setThrottledReplicas(entry.getKey(), entry.getValue());
